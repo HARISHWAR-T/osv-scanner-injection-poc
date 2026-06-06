@@ -1,0 +1,30 @@
+name: osv-scanner-injection-poc
+on: [push]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install osv-scanner
+        run: |
+          go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
+        env:
+          GOBIN: /usr/local/bin
+
+      - name: Run osv-scanner (default table output)
+        run: |
+          echo "=== Running osv-scanner with default table output ==="
+          echo "=== If injection works, ::stop-commands:: will suppress the canary below ==="
+          osv-scanner scan source -L package-lock.json || true
+
+      - name: Canary - this annotation should be SUPPRESSED if injection works
+        run: |
+          echo "THIS LINE PROVES INJECTION: if you see this text but no warning annotation below,"
+          echo "then ::stop-commands:: has disabled workflow command processing."
+          echo ""
+          echo "::warning::CANARY - If you can see this warning annotation, injection did NOT work"
+          echo ""
+          echo "If the above ::warning:: did NOT produce a yellow annotation in the GHA UI,"
+          echo "then ::stop-commands:: from the osv-scanner output successfully disabled it."
