@@ -13,18 +13,12 @@ jobs:
         env:
           GOBIN: /usr/local/bin
 
-      - name: Run osv-scanner (default table output)
+      - name: Run osv-scanner with license check (default table output)
         run: |
-          echo "=== Running osv-scanner with default table output ==="
-          echo "=== If injection works, ::stop-commands:: will suppress the canary below ==="
-          osv-scanner scan source -L package-lock.json || true
+          echo "=== Running osv-scanner with --licenses flag ==="
+          echo "=== This triggers license violations table ==="
+          osv-scanner scan source --licenses=MIT,Apache-2.0 -L package-lock.json || true
 
       - name: Canary - this annotation should be SUPPRESSED if injection works
         run: |
-          echo "THIS LINE PROVES INJECTION: if you see this text but no warning annotation below,"
-          echo "then ::stop-commands:: has disabled workflow command processing."
-          echo ""
           echo "::warning::CANARY - If you can see this warning annotation, injection did NOT work"
-          echo ""
-          echo "If the above ::warning:: did NOT produce a yellow annotation in the GHA UI,"
-          echo "then ::stop-commands:: from the osv-scanner output successfully disabled it."
