@@ -7,18 +7,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install osv-scanner
+      - name: CR splitting test - direct printf
         run: |
-          go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
-        env:
-          GOBIN: /usr/local/bin
+          echo "=== CR splitting test ==="
+          printf 'some text before\r::warning::INJECTED_VIA_CR - this warning was injected via carriage return splitting\r::error::INJECTED_ERROR_VIA_CR\n'
+          echo "=== end of test ==="
 
-      - name: Run osv-scanner with license check (default table output)
+      - name: Canary annotation
         run: |
-          echo "=== Running osv-scanner with --licenses flag ==="
-          echo "=== This triggers license violations table ==="
-          osv-scanner scan source --licenses=MIT,Apache-2.0 -L package-lock.json || true
-
-      - name: Canary - this annotation should be SUPPRESSED if injection works
-        run: |
-          echo "::warning::CANARY - If you can see this warning annotation, injection did NOT work"
+          echo "::warning::CANARY - visible means injection did not suppress commands"
